@@ -12,6 +12,9 @@ def backward(model, inputs, outputs, loss, learning_rate):
     gradients = t.gradient(current_loss, model.params())
     # model.W.assign_sub(learning_rate * dW)
     # model.b.assign_sub(learning_rate * db)
+    
+    gradients[inputs> 1] = 0
+    gradients[inputs<-1] = 0
     model.update(gradients, learning_rate)
 
 
