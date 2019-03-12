@@ -2,15 +2,22 @@ import tensorflow as tf
 from tensorflow.python.framework import ops
 
 
-def binarize(tensor, dtype=tf.float32):
-    # ones = tf.ones(tensor.shape, dtype)
-    # twos = tf.cast(tf.fill(tensor.shape, 2), dtype)
+def binarize(x, dtype=tf.float32):
+    # ones = tf.ones(x.shape, dtype)
+    # twos = tf.cast(tf.fill(x.shape, 2), dtype)
     #
-    # tensor = tf.greater_equal(tensor, 0)  # True, False
-    # tensor = tf.cast(tensor, dtype)  # 0, 1
-    # tensor = tf.multiply(tensor, twos)  # 0, 2
-    # return tf.subtract(tensor, ones)  # -1, 1
-    return tf.math.sign(tensor)
+    # x = tf.greater_equal(x, 0)  # True, False
+    # x = tf.cast(x, dtype)  # 0, 1
+    # x = tf.multiply(x, twos)  # 0, 2
+    # x tf.subtract(x, ones)  # -1, 1
+    return tf.math.sign(x)
+
+
+def clip(x):
+    x_type = x.dtype
+    return tf.clip_by_value(x,
+                            clip_value_min=tf.constant(-1, dtype=x_type),
+                            clip_value_max=tf.constant(1, dtype=x_type))
 
 
 def binaryRound(x):

@@ -7,4 +7,4 @@ from binary_neuron.train import train
 
 model = Model()
 
-train(model, data, labels, epochs=10)
+train(model, data, labels, epochs=100)
