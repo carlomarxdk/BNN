@@ -20,12 +20,12 @@ class Model(object):
 
     def __call__(self, x):
         for weight in self.weights[:-1]:
-            # weight = binarize(weight)
+            weight = binarize(weight)
             x = tf.linalg.matmul(weight, x)
-            # x = binarize(x)
+            x = binarize(x)
 
         last_weight = self.weights[-1]
-        # last_weight = binarize(last_weight)
+        last_weight = binarize(last_weight)
 
         out = tf.linalg.matmul(last_weight, x)
         return tf.reshape(out, [-1])

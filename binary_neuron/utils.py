@@ -3,13 +3,14 @@ from tensorflow.python.framework import ops
 
 
 def binarize(tensor, dtype=tf.float32):
-    ones = tf.ones(tensor.shape, dtype)
-    twos = tf.cast(tf.fill(tensor.shape, 2), dtype)
-
-    tensor = tf.greater_equal(tensor, 0)  # True, False
-    tensor = tf.cast(tensor, dtype)  # 0, 1
-    tensor = tf.multiply(tensor, twos)  # 0, 2
-    return tf.subtract(tensor, ones)  # -1, 1
+    # ones = tf.ones(tensor.shape, dtype)
+    # twos = tf.cast(tf.fill(tensor.shape, 2), dtype)
+    #
+    # tensor = tf.greater_equal(tensor, 0)  # True, False
+    # tensor = tf.cast(tensor, dtype)  # 0, 1
+    # tensor = tf.multiply(tensor, twos)  # 0, 2
+    # return tf.subtract(tensor, ones)  # -1, 1
+    return tf.math.sign(tensor)
 
 
 def binaryRound(x):
