@@ -1,10 +1,11 @@
 import tensorflow as tf
 import numpy as np
-from binary_neuron.utils import clip
+import matplotlib.pyplot as plt
 
 
-def loss(predicted_y, desired_y):
-    return tf.reduce_mean(tf.square(predicted_y - desired_y))
+def loss(output, target):
+    target = tf.convert_to_tensor(target, dtype=tf.float32)
+    return tf.reduce_mean(tf.square(output - target))
 
 
 def backward(model, inputs, targets, loss, learning_rate):
@@ -18,22 +19,28 @@ def backward(model, inputs, targets, loss, learning_rate):
 
     gradients = t.gradient(current_loss, model.params())
 
-    clipped_gradients = [clip(gradient) for gradient in gradients[:-1]]
-    clipped_gradients.append(gradients[-1])
-
     # print('Gradients: ', gradients)
-    model.update(clipped_gradients, learning_rate)
+    model.update(gradients, learning_rate)
 
 
 def train(model, inputs, targets, epochs=10):
+    plt.scatter(inputs[:, 0], inputs[:, 1], s=40, c=targets, cmap=plt.cm.Spectral)
+    plt.show()
+    losses = np.zeros(epochs)
     for epoch in range(epochs):
         current_loss = []
-        for i in range(inputs.shape[0]):
-            input = tf.convert_to_tensor(inputs[np.newaxis, i].T, dtype=tf.float32)
-            target = tf.convert_to_tensor(targets[i], dtype=tf.float32)
+        for idx, input in enumerate(inputs):
+            target = targets[idx]
             current_loss.append(loss(model(input), target))
 
             backward(model, input, target, loss, learning_rate=1e-4)
 
         print('Epoch %2d: loss=%2.5f' %
               (epoch, np.asarray(current_loss).mean()))
+        losses[epoch] = np.asarray(current_loss).mean()
+    plt.plot(losses)
+    plt.show()
+
+    targets = np.asarray([model(input).numpy() for input in inputs]).flatten()
+    plt.scatter(inputs[:, 0], inputs[:, 1], s=40, c=targets, cmap=plt.cm.Spectral)
+    plt.show()

@@ -1,11 +1,14 @@
 import tensorflow as tf
-from binary_neuron.utils import binarize, hard_tanh
+from binary_neuron.utils import binarize
+import numpy as np
 
 
 class Model(object):
     def __init__(self):
         self.weights = [
-            tf.Variable(tf.random.uniform([20, 2], dtype=tf.float32,
+            tf.Variable(tf.random.uniform([50, 2], dtype=tf.float32,
+                                          minval=tf.constant(-1, dtype=tf.float32))),
+            tf.Variable(tf.random.uniform([20, 50], dtype=tf.float32,
                                           minval=tf.constant(-1, dtype=tf.float32))),
             tf.Variable(tf.random.uniform([1, 20], dtype=tf.float32,
                                           minval=tf.constant(-1, dtype=tf.float32)))
@@ -19,13 +22,15 @@ class Model(object):
             weight.assign_sub(gradients[idx] * learning_rate)
 
     def __call__(self, x):
+        x = tf.convert_to_tensor(x[np.newaxis].T, dtype=tf.float32)
+
         for weight in self.weights[:-1]:
             weight = binarize(weight)
             x = tf.linalg.matmul(weight, x)
             x = binarize(x)
 
         last_weight = self.weights[-1]
-        # last_weight = binarize(last_weight)
+        last_weight = binarize(last_weight)
 
         out = tf.linalg.matmul(last_weight, x)
         return tf.reshape(out, [-1])
