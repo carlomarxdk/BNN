@@ -16,3 +16,13 @@ def binarize(x):
         return tf.clip_by_value(dy, -1.0, 1.0)
 
     return tf.sign(x), grad
+
+
+def batch_norm(inputs, weights):
+    mean, variance = tf.nn.moments(inputs, axis=0)
+    x_hat = tf.math.add(inputs, -mean)/ tf.math.sqrt(variance) ## we can add noise
+    return x_hat
+
+def mini_batch(inputs, outputs, n_batches = 10):
+    return [tf.split(inputs, n_batches, axis=0) ,
+           tf.split(outputs, n_batches, axis=0)]
