@@ -12,3 +12,7 @@ model = Model(n_classes=2, n_features=2)
 train(model, data,labels)
 
 
+#x, y = mini_batch(inputs, outputs)
+#for batch in x:
+#    for indx, value in enumerate(batch):
+#        print(value)

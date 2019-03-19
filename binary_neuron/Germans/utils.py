@@ -18,9 +18,9 @@ def binarize(x):
     return tf.sign(x), grad
 
 
-def batch_norm(inputs, weights):
-    mean, variance = tf.nn.moments(inputs, axis=0)
-    x_hat = tf.math.add(inputs, -mean)/ tf.math.sqrt(variance) ## we can add noise
+def batch_norm(batch_inputs, weights):
+    mean, variance = tf.nn.moments(batch_inputs, axis=0)
+    x_hat = tf.math.add(batch_inputs, -mean)/ tf.math.sqrt(variance) ## we can add noise
     return x_hat
 
 def mini_batch(inputs, outputs, n_batches = 10):
