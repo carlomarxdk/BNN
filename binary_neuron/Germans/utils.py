@@ -1,7 +1,7 @@
 import tensorflow as tf
 
-
-def binarize(tensor):
+@tf.custom_gradient
+def binarize_(tensor):
     ones = tf.ones(tensor.shape, tf.float32)
     twos = tf.cast(tf.fill(tensor.shape, 2), tf.float32)
 
@@ -9,3 +9,10 @@ def binarize(tensor):
     tensor = tf.cast(tensor, tf.float32)  # 0, 1
     tensor = tf.multiply(tensor, twos)  # 0, 2
     return tf.subtract(tensor, ones)  # -1, 1
+
+@tf.custom_gradient
+def binarize(x):
+    def grad(dy):
+        return tf.clip_by_value(dy, -0.1, 0.1)
+
+    return tf.sign(x), grad

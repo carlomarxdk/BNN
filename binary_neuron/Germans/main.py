@@ -1,14 +1,11 @@
 import tensorflow as tf
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
+import numpy as np
 tf.enable_eager_execution()
 
-import numpy as np
+from binary_neuron.Germans.data_loader import data, labels, inputs, outputs
+from binary_neuron.Germans.model import Model
+from binary_neuron.Germans.train import train
 
-from data_loader import data, labels, inputs, outputs
-from model import Model
-from train import train
-
-model = Model(n_classes=2, n_features=1)
+model = Model(n_classes=2, n_features=2)
 
 train(model, data,labels)

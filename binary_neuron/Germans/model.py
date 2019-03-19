@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from utils import binarize
+from binary_neuron.Germans.utils import binarize
 
 class Model(object):
 
@@ -12,33 +12,36 @@ class Model(object):
         self.learning_rate = learning_rate
         self.n_batches = n_batches
         self.random_seed = random_seed
-        [self.W1, self.W2] = self._init_weights()
+        self.weights = self._init_weights()
 
     def _init_weights(self):
-        w1 = tf.random.uniform(shape=(self.n_hidden_units, self.n_features), minval=-1.0, maxval=1.0)
-        w2 = tf.random.uniform(shape=(self.n_hidden_units, self.n_features), minval=-1.0, maxval=1.0)
-        return w1, w2
+        w1 = tf.Variable(tf.random.uniform(shape=(self.n_hidden_units*2, self.n_features), minval=-1.0, maxval=1.0))
+        w2 = tf.Variable(tf.random.uniform(shape=(self.n_hidden_units, self.n_hidden_units*2), minval=-1.0, maxval=1.0))
+        w3 = tf.Variable(tf.random.uniform(shape=(1, self.n_hidden_units), minval=-1.0, maxval=1.0))
+        return [w1,w2, w3]
 
     def params(self):
-        return [self.W1]
+        return self.weights
 
     def forward(self, input):
-        net_hidden = tf.tensordot(input, self.W1, axes=0)
-        act_hidden = tf.sigmoid(net_hidden)
-        result = (tf.transpose(tf.reduce_sum(act_hidden,axis=0)))
-        #result = tf.reduce_sum(act_hidden,axis=0)
-        return (tf.cast(tf.reshape(tf.argmax(result, axis=1), [-1]), dtype= tf.float32))
+        self.__call__(self, input)
 
     def update(self, gradients, learning_rate):
-        for idx, weight in enumerate(self.W1):
+        for idx, weight in enumerate(self.weights):
             tf.assign_sub(weight, (gradients[idx] * learning_rate))
 
+    def __call__(self, x):
+        x = tf.convert_to_tensor(x[np.newaxis].T, dtype=tf.float32)
 
-    def __call__(self, input):
-        net_hidden = tf.tensordot(input, self.W1, axes=0)
-        act_hidden = tf.sigmoid(net_hidden)
-        result = (tf.transpose(tf.reduce_sum(act_hidden,axis=0)))
-        #result = tf.reduce_sum(act_hidden,axis=0)
-        result = tf.cast(tf.argmax(result, axis=1), dtype= tf.float32)
-        print(result)
-        return result
+        for weight in self.weights[:-1]:
+            weight = binarize(weight)
+            x = tf.tensordot(weight, x, axes=1)
+            x = binarize(x)
+
+        last_weight = self.weights[-1]
+        last_weight = binarize(last_weight)
+
+        out = tf.linalg.matmul(last_weight, x)
+        out = tf.sigmoid(out)
+        return tf.reshape(out, [-1])
+
