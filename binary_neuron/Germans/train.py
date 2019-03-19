@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
 
 def loss(output, target):
     target = tf.convert_to_tensor(target, dtype=tf.float32)
@@ -17,6 +18,7 @@ def train(model, inputs, targets):
     losses = np.zeros(model.epochs)
     for epoch in range(model.epochs):
         current_loss = []
+
         for idx, input in enumerate(inputs):
             target = targets[idx]
             current_loss.append(loss(model(input), target))
@@ -26,3 +28,7 @@ def train(model, inputs, targets):
         print('Epoch %2d: loss=%2.5f' %
               (epoch, np.asarray(current_loss).mean()))
         losses[epoch] = np.asarray(current_loss).mean()
+
+    targets = np.asarray([model(input).numpy() for input in inputs]).flatten()
+    plt.scatter(inputs[:, 0], inputs[:, 1], s=40, c=targets, cmap=plt.cm.Spectral)
+    plt.show()

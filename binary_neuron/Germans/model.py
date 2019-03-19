@@ -15,16 +15,18 @@ class Model(object):
         self.weights = self._init_weights()
 
     def _init_weights(self):
-        w1 = tf.Variable(tf.random.uniform(shape=(self.n_hidden_units*2, self.n_features), minval=-1.0, maxval=1.0))
-        w2 = tf.Variable(tf.random.uniform(shape=(self.n_hidden_units, self.n_hidden_units*2), minval=-1.0, maxval=1.0))
-        w3 = tf.Variable(tf.random.uniform(shape=(1, self.n_hidden_units), minval=-1.0, maxval=1.0))
-        return [w1,w2, w3]
+        w1 = tf.Variable(tf.random.uniform(shape=(self.n_hidden_units, self.n_features), minval=-16.0, maxval=16.0))
+        w2 = tf.Variable(tf.random.uniform(shape=(self.n_hidden_units*2, self.n_hidden_units), minval=-16.0, maxval=16.0))
+        w3 = tf.Variable(tf.random.uniform(shape=(self.n_hidden_units, self.n_hidden_units*2), minval=-16.0, maxval=16.0))
+
+        w4 = tf.Variable(tf.random.uniform(shape=(1, self.n_hidden_units), minval=-16.0, maxval=16.0))
+        return [w1,w2, w3, w4]
 
     def params(self):
         return self.weights
 
     def forward(self, input):
-        self.__call__(self, input)
+        self.__call__(input)
 
     def update(self, gradients, learning_rate):
         for idx, weight in enumerate(self.weights):
