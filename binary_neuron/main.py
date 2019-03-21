@@ -6,4 +6,4 @@ from binary_neuron.model import Model
 from binary_neuron.train import train
 
 model = Model()
-train(model, data, labels, epochs=100)
+train(model, data, labels, epochs=50)

@@ -1,17 +1,14 @@
 import tensorflow as tf
-from binary_neuron.utils import binarize
+from binary_neuron.utils import binarize, round
 import numpy as np
 
 
 class Model(object):
     def __init__(self):
         self.weights = [
-            tf.Variable(tf.random.uniform([50, 2], dtype=tf.float32,
-                                          minval=tf.constant(-1, dtype=tf.float32))),
-            tf.Variable(tf.random.uniform([20, 50], dtype=tf.float32,
-                                          minval=tf.constant(-1, dtype=tf.float32))),
-            tf.Variable(tf.random.uniform([1, 20], dtype=tf.float32,
-                                          minval=tf.constant(-1, dtype=tf.float32)))
+            tf.Variable(tf.random.uniform([100, 2], minval=-1.0, maxval=1.0, dtype=tf.float32)),
+            tf.Variable(tf.random.uniform([50, 100], minval=-1.0, maxval=1.0, dtype=tf.float32)),
+            tf.Variable(tf.random.uniform([1, 50], minval=-1.0, maxval=1.0, dtype=tf.float32))
         ]
 
     def params(self):
@@ -19,7 +16,7 @@ class Model(object):
 
     def update(self, gradients, learning_rate):
         for idx, weight in enumerate(self.weights):
-            weight.assign_sub(gradients[idx] * learning_rate)
+            weight.assign_sub(tf.clip_by_value(gradients[idx], -1.0, 1.0) * learning_rate)
 
     def __call__(self, x):
         x = tf.convert_to_tensor(x[np.newaxis].T, dtype=tf.float32)
@@ -33,6 +30,8 @@ class Model(object):
         last_weight = binarize(last_weight)
 
         out = tf.linalg.matmul(last_weight, x)
+        out = tf.sigmoid(out)
+        out = round(out)
         return tf.reshape(out, [-1])
 
 
