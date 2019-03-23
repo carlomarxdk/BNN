@@ -13,20 +13,15 @@ global_step = tf.train.get_or_create_global_step()
 def loss(output, target):
     target = tf.convert_to_tensor(target, dtype=tf.float32)
     return tf.reduce_mean(tf.square(output - target))
-def simple_loss(output, target):
-    output = output.numpy()
-    if output == target:
-        return tf.convert_to_tensor(0, dtype=tf.float32)
-    else:
-        return tf.convert_to_tensor(1, dtype=tf.float32)
+
 
 def backward(model, inputs, outputs, loss, learning_rate):
     with tf.GradientTape() as t:
-        #loss_value = loss(model(inputs), outputs)
-        loss_value = simple_loss(model(inputs), outputs)
-
+        loss_value = loss(model(inputs), outputs)
 
     gradients = t.gradient(loss_value, model.params())
+    global_step.assign_add(1)
+    log_gradient(gradients)
     model.update(gradients, learning_rate)
 
 def train(model, inputs, targets):
@@ -36,8 +31,8 @@ def train(model, inputs, targets):
         current_loss = []
         for idx, input in enumerate(inputs):
             target = targets[idx]
-            current_loss.append(simple_loss(model(input), target))
-            backward(model, input, target, simple_loss, learning_rate=model.learning_rate)
+            current_loss.append(loss(model(input), target))
+            backward(model, input, target, loss, learning_rate=model.learning_rate)
 
         global_step.assign_add(1)
         log_loss(np.asarray(current_loss).mean())
