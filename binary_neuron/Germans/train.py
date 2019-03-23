@@ -20,8 +20,6 @@ def backward(model, inputs, outputs, loss, learning_rate):
         loss_value = loss(model(inputs), outputs)
 
     gradients = t.gradient(loss_value, model.params())
-    global_step.assign_add(1)
-    log_gradient(gradients)
     model.update(gradients, learning_rate)
 
 def train(model, inputs, targets):
@@ -53,19 +51,18 @@ def log_loss(loss):
 def log_weight(w):
     with tf.contrib.summary.always_record_summaries():
         with tf.name_scope('Weights'):
-            tf.contrib.summary.histogram('W1', w[0])
-            tf.contrib.summary.histogram('W2', w[1])
-            tf.contrib.summary.histogram('W3', w[2])
+            tf.contrib.summary.histogram('Layer_1', w[0])
+            tf.contrib.summary.histogram('Layer_2', w[1])
+            tf.contrib.summary.histogram('Layer_3', w[2])
+            tf.contrib.summary.histogram('Layer_4', w[3])
+
         with tf.name_scope('Binary Weights'):
             tf.contrib.summary.histogram('Layer_1', binarize(w[0]))
             tf.contrib.summary.histogram('Layer_2', binarize(w[1]))
             tf.contrib.summary.histogram('Layer_3', binarize(w[2]))
-def log_gradient(g):
-    with tf.contrib.summary.always_record_summaries():
-        with tf.name_scope('Gradient'):
-            tf.contrib.summary.histogram('L1', g[0])
-            tf.contrib.summary.histogram('L2', g[1])
-            tf.contrib.summary.histogram('L3', g[2])
+            tf.contrib.summary.histogram('Layer_4', binarize(w[3]))
+
+
 
 
 
