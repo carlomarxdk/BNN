@@ -10,7 +10,7 @@ from binary_neuron.Germans.utils import mini_batch
 
 
 
-model = Model(n_classes=2, n_features=2, epochs=100)
+model = Model(n_classes=2, n_features=2, epochs=10)
 
 train(model, data,labels)
 

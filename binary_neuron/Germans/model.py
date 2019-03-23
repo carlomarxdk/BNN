@@ -4,7 +4,7 @@ from binary_neuron.Germans.utils import binarize
 
 class Model(object):
 
-    def __init__(self, n_classes, n_features, n_hidden_units=10, learning_rate=0.01, n_batches = 1, epochs = 10, random_seed = 12):
+    def __init__(self, n_classes, n_features, n_hidden_units=50, learning_rate=0.001, n_batches = 1, epochs = 10, random_seed = 12):
         self.n_classes = n_classes
         self.n_features = n_features
         self.n_hidden_units = n_hidden_units
@@ -42,6 +42,6 @@ class Model(object):
         last_weight = binarize(last_weight)
 
         out = tf.linalg.matmul(last_weight, x)
-        out = tf.sigmoid(out)
+        #out = tf.sigmoid(out)
         return tf.reshape(out, [-1])
 
