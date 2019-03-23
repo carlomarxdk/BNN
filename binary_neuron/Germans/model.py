@@ -33,10 +33,8 @@ class Model(object):
             tf.assign_sub(weight, (gradients[idx] * learning_rate))
 
     def __call__(self, x):
-        print(x)
-        x = tf.convert_to_tensor(x[np.newaxis], dtype=tf.float32)
-        #x = tf.transpose(tf.cast(x[np.newaxis], dtype=tf.float32))
-        print(x)
+        x = tf.convert_to_tensor(x[np.newaxis].T, dtype=tf.float32)
+
         for weight in self.weights[:-1]:
             weight = binarize(weight)
             x = tf.tensordot(weight, x, axes=1)

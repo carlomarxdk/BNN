@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-from binary_neuron.Germans.utils import mini_batch
 
 def loss(output, target):
     target = tf.convert_to_tensor(target, dtype=tf.float32)
@@ -19,13 +18,12 @@ def train(model, inputs, targets):
     losses = np.zeros(model.epochs)
     for epoch in range(model.epochs):
         current_loss = []
-        batch_inputs, batch_outputs = mini_batch(inputs, targets)
-        for indx_, batch in enumerate(batch_inputs):
-            for idx, input in enumerate(batch):
-                target = batch_outputs[indx_][idx]
-                current_loss.append(loss(model(input), target))
 
-                backward(model, input, target, loss, learning_rate=model.learning_rate)
+        for idx, input in enumerate(inputs):
+            target = targets[idx]
+            current_loss.append(loss(model(input), target))
+
+            backward(model, input, target, loss, learning_rate=model.learning_rate)
 
         print('Epoch %2d: loss=%2.5f' %
               (epoch, np.asarray(current_loss).mean()))
