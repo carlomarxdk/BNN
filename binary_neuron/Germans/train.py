@@ -20,11 +20,19 @@ def backward(model, inputs, outputs, loss, learning_rate):
         loss_value = loss(model(inputs), outputs)
 
     gradients = t.gradient(loss_value, model.params())
+    _gradients = []
+    for gradient in gradients:
+        max = tf.norm(gradient)
+        if not tf.equal(max, 0):
+            _gradients.append(gradient / max)
+        else:
+            _gradients.append(gradient)
+    gradients = _gradients
+
     model.update(gradients, learning_rate)
 
 def train(model, inputs, targets):
-
-    losses = np.zeros(model.epochs)
+    losses = np.zeros(model.epochs) #vector of losses per epoch
     for epoch in range(model.epochs):
         current_loss = []
         for idx, input in enumerate(inputs):
@@ -35,14 +43,18 @@ def train(model, inputs, targets):
         global_step.assign_add(1)
         log_loss(np.asarray(current_loss).mean())
         log_weight(model.params())
-        print('Epoch %2d: loss=%2.5f' %
-              (epoch, np.asarray(current_loss).mean()))
-        losses[epoch] = np.asarray(current_loss).mean()
+        log_prediction(model)
+        print_loss(losses, epoch, current_loss)
 
+## IMAGE!!!!
+def log_prediction(model):
     grid = np.asarray([(i / 10, j / 10) for j in range(-20, 20) for i in range(-20, 20)])
-    targets = np.asarray([model(input).numpy() for input in grid]).flatten()
-    plt.scatter(grid[:, 0], grid[:, 1], s=40, c=targets, cmap=plt.cm.Spectral)
-    plt.show()
+    x= np.asarray([model(input).numpy() for input in grid]).flatten()
+    print(x.shape)
+    image = tf.reshape(tf.reshape(x, [-1]), [-1, 40, 40, 1])
+
+    with tf.contrib.summary.always_record_summaries():
+        tf.contrib.summary.image('Boundry', image)
 
 def log_loss(loss):
     with tf.contrib.summary.always_record_summaries():
@@ -63,7 +75,10 @@ def log_weight(w):
             tf.contrib.summary.histogram('Layer_4', binarize(w[3]))
 
 
-
+def print_loss(losses, epoch, current_loss):
+    print('Epoch %2d: loss=%2.5f' %
+          (epoch, np.asarray(current_loss).mean()))
+    losses[epoch] = np.asarray(current_loss).mean()
 
 
 
