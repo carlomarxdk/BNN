@@ -5,7 +5,7 @@ from binary_neuron.Germans.utils import *
 
 def log_prediction(model):
     grid = np.asarray([(i / 10, j / 10) for j in range(-20, 20) for i in range(-20, 20)])
-    x= np.asarray([model(input).numpy() for input in grid]).flatten()
+    x= np.asarray([tf.argmax(model(input)).numpy() for input in grid]).flatten()
     image = tf.reshape(tf.reshape(x, [-1]), [-1, 40, 40, 1])
 
     with tf.contrib.summary.always_record_summaries():

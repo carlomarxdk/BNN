@@ -5,7 +5,7 @@ from binary_neuron.Germans.Logs import *
 
 class Model(object):
 
-    def __init__(self, n_classes, n_features, n_hidden_units=10, learning_rate=0.1, epochs = 50, decay = 0.9 ):
+    def __init__(self, n_classes, n_features, n_hidden_units=10, learning_rate=0.01, epochs = 50, decay = 0.9 ):
         self.n_classes = n_classes
         self.n_features = n_features
         self.n_hidden_units = n_hidden_units
@@ -49,7 +49,7 @@ class Model(object):
 
         last_weight = binarize(self.weights[-1])
         out = tf.matmul(last_weight, a)
-        out = tf.nn.softmax(out)
-        out = tf.argmax(out, 1)
+        out = tf.nn.log_softmax(out)
+        out = tf.cast(out, dtype=tf.float32)
         return out
 
