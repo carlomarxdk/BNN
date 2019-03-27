@@ -5,7 +5,7 @@ from binary_neuron.Germans.Logs import *
 
 class Model(object):
 
-    def __init__(self, n_classes, n_features, n_hidden_units=10, learning_rate=0.01, epochs = 50, decay = 0.9 ):
+    def __init__(self, n_classes, n_features, n_hidden_units=10, learning_rate=0.1, epochs = 100, decay = 0.99):
         self.n_classes = n_classes
         self.n_features = n_features
         self.n_hidden_units = n_hidden_units
@@ -13,18 +13,20 @@ class Model(object):
         self.learning_rate = learning_rate
         self.decay = decay
         self.weights = self._init_weights()
-        self.batch_size = 100
+        self.batch_size = 10
 
     def _init_weights(self):
-        weight_initializer = tf.truncated_normal_initializer(stddev=10)
+        weight_initializer = tf.truncated_normal_initializer(stddev=0.1)
         with tf.variable_scope('Layer1'):
-            w1 = tf.get_variable('W1', shape=[self.n_hidden_units, self.n_features], initializer=weight_initializer)
+            w1 = tf.get_variable('W1', shape=[self.n_hidden_units*10, self.n_features], initializer=weight_initializer)
         with tf.variable_scope('Layer2'):
-            w2 = tf.get_variable('W2', shape=[self.n_hidden_units*2, self.n_hidden_units], initializer=weight_initializer)
+            w2 = tf.get_variable('W2', shape=[self.n_hidden_units, self.n_hidden_units*10], initializer=weight_initializer)
         with tf.variable_scope('Layer3'):
-            w3 = tf.get_variable('W3', shape=[self.n_classes, self.n_hidden_units*2], initializer=weight_initializer)
+            w3 = tf.get_variable('W3', shape=[self.n_hidden_units, self.n_hidden_units], initializer=weight_initializer)
+        with tf.variable_scope('Layer4'):
+            w4 = tf.get_variable('W4', shape=[self.n_classes, self.n_hidden_units], initializer=weight_initializer)
 
-        return [w1, w2, w3]
+        return [w1, w2, w3, w4]
 
     def params(self):
         return self.weights
