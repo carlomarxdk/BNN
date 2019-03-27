@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from binary_neuron.Germans.utils import binarize
+from binary_neuron.Germans.Logs import *
 tf.enable_eager_execution()
 
 ## for tensorboard
@@ -11,75 +12,57 @@ global_step = tf.train.get_or_create_global_step()
 
 
 def loss(output, target):
-    target = tf.convert_to_tensor(target, dtype=tf.float32)
+    with tf.variable_scope('loss'):
+        target = tf.convert_to_tensor(target, dtype=tf.float32)
     return tf.reduce_mean(tf.square(output - target))
 
+def CrossEntropy(yHat, y):
+    y = tf.cast(y, dtype=tf.float32)
+    with tf.variable_scope('loss'):
+        # computing cross entropy per sample
+        ##print(yHat,y)
+
+        cross_entropy = -tf.reduce_sum(y * tf.log(yHat + 1e-6), reduction_indices=[1])
+        # Average over samples
+        # Averaging makes the loss invariant to batch size, which is very nice.
+        cross_entropy = tf.reduce_mean(cross_entropy)
+    return cross_entropy
+
+def loss_fn(model, x, y):
+    return tf.reduce_mean(
+      tf.nn.softmax_cross_entropy_with_logits_v2(
+          logits=model(x), labels=y))
+
+def Hinge(yHat, y):
+    return tf.maximum(0, 1 - yHat * y)
 
 def backward(model, inputs, outputs, loss, learning_rate):
     with tf.GradientTape() as t:
-        loss_value = loss(model(inputs), outputs)
+        loss_value = loss(model, inputs, outputs)
 
     gradients = t.gradient(loss_value, model.params())
-    _gradients = []
-    for gradient in gradients:
-        max = tf.norm(gradient)
-        if not tf.equal(max, 0):
-            _gradients.append(gradient / max)
-        else:
-            _gradients.append(gradient)
-    gradients = _gradients
-
+    print(gradients, loss_value)
     model.update(gradients, learning_rate)
 
 def train(model, inputs, targets):
-    losses = np.zeros(model.epochs) #vector of losses per epoch
+    dataset = data(inputs, targets, model.batch_size)
+    losses = np.zeros(model.epochs)
     for epoch in range(model.epochs):
-        current_loss = []
-        for idx, input in enumerate(inputs):
-            target = targets[idx]
-            current_loss.append(loss(model(input), target))
-            backward(model, input, target, loss, learning_rate=model.learning_rate)
+        current_loss = np.zeros(model.batch_size)
+        for batch, (X, y) in enumerate(dataset):
+            if batch < model.batch_size:
+                backward(model, X, y, CrossEntropy, learning_rate=model.learning_rate)
+                current_loss[batch]= (CrossEntropy(model, X, y)).numpy()
 
+        losses[epoch] = np.asarray(current_loss).mean()
+        print_loss(losses, epoch, losses[epoch])
+
+        model.update_learning_rate()
         global_step.assign_add(1)
-        log_loss(np.asarray(current_loss).mean())
+        ##print(current_loss)
+        log_loss(np.asarray(losses[epoch]))
         log_weight(model.params())
-        log_prediction(model)
-        print_loss(losses, epoch, current_loss)
-
-## IMAGE!!!!
-def log_prediction(model):
-    grid = np.asarray([(i / 10, j / 10) for j in range(-20, 20) for i in range(-20, 20)])
-    x= np.asarray([model(input).numpy() for input in grid]).flatten()
-    print(x.shape)
-    image = tf.reshape(tf.reshape(x, [-1]), [-1, 40, 40, 1])
-
-    with tf.contrib.summary.always_record_summaries():
-        tf.contrib.summary.image('Boundry', image)
-
-def log_loss(loss):
-    with tf.contrib.summary.always_record_summaries():
-        tf.contrib.summary.scalar('Loss_Per_Epoch', loss)
-
-def log_weight(w):
-    with tf.contrib.summary.always_record_summaries():
-        with tf.name_scope('Weights'):
-            tf.contrib.summary.histogram('Layer_1', w[0])
-            tf.contrib.summary.histogram('Layer_2', w[1])
-            tf.contrib.summary.histogram('Layer_3', w[2])
-            tf.contrib.summary.histogram('Layer_4', w[3])
-
-        with tf.name_scope('Binary Weights'):
-            tf.contrib.summary.histogram('Layer_1', binarize(w[0]))
-            tf.contrib.summary.histogram('Layer_2', binarize(w[1]))
-            tf.contrib.summary.histogram('Layer_3', binarize(w[2]))
-            tf.contrib.summary.histogram('Layer_4', binarize(w[3]))
-
-
-def print_loss(losses, epoch, current_loss):
-    print('Epoch %2d: loss=%2.5f' %
-          (epoch, np.asarray(current_loss).mean()))
-    losses[epoch] = np.asarray(current_loss).mean()
-
+        #log_prediction(model)
 
 
 
