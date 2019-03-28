@@ -5,7 +5,7 @@ from binary_neuron.Germans.Logs import *
 
 class Model(object):
 
-    def __init__(self, n_classes, n_features, n_hidden_units=10, learning_rate=0.1, epochs = 100, decay = 0.99):
+    def __init__(self, n_classes, n_features, n_hidden_units=50, learning_rate=0.01, epochs = 100, decay = 0.9):
         self.n_classes = n_classes
         self.n_features = n_features
         self.n_hidden_units = n_hidden_units
@@ -18,13 +18,13 @@ class Model(object):
     def _init_weights(self):
         weight_initializer = tf.truncated_normal_initializer(stddev=0.1)
         with tf.variable_scope('Layer1'):
-            w1 = tf.get_variable('W1', shape=[self.n_hidden_units*10, self.n_features], initializer=weight_initializer)
+            w1 = tf.get_variable('W1', shape=[self.n_hidden_units*5, self.n_features], initializer=weight_initializer)
         with tf.variable_scope('Layer2'):
-            w2 = tf.get_variable('W2', shape=[self.n_hidden_units, self.n_hidden_units*10], initializer=weight_initializer)
+            w2 = tf.get_variable('W2', shape=[self.n_hidden_units, self.n_hidden_units*5], initializer=weight_initializer)
         with tf.variable_scope('Layer3'):
-            w3 = tf.get_variable('W3', shape=[self.n_hidden_units, self.n_hidden_units], initializer=weight_initializer)
+            w3 = tf.get_variable('W3', shape=[self.n_hidden_units*5, self.n_hidden_units], initializer=weight_initializer)
         with tf.variable_scope('Layer4'):
-            w4 = tf.get_variable('W4', shape=[self.n_classes, self.n_hidden_units], initializer=weight_initializer)
+            w4 = tf.get_variable('W4', shape=[self.n_classes, self.n_hidden_units*5], initializer=weight_initializer)
 
         return [w1, w2, w3, w4]
 
@@ -47,7 +47,8 @@ class Model(object):
         for weight in self.weights[:-1]:
             weight = binarize(weight) ##binirize weights
             a = tf.matmul(weight, a)
-            a = binarize(a) ## binirize input of the previous layer
+            a = tf.nn.sigmoid(a)
+            #a = binarize(a) ## binirize input of the previous layer
 
         last_weight = binarize(self.weights[-1])
         out = tf.matmul(last_weight, a)

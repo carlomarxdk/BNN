@@ -40,7 +40,7 @@ def accuracy(model, input, target):
     with tf.variable_scope('performance'):
         # making a one-hot encoded vector of correct (1) and incorrect (0) predictions
         correct_prediction = tf.equal(tf.cast(tf.argmax(model(input)),dtype=tf.int32), target)
-
+        ##print(correct_prediction)
         # averaging the one-hot encoded vector
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     return accuracy
@@ -51,7 +51,7 @@ def backward(model, inputs, outputs, loss, learning_rate):
         loss_value = loss(model, inputs, outputs)
 
     gradients = t.gradient(loss_value, model.params())
-    model.update(gradients, learning_rate)
+    #model.update(gradients, learning_rate)
 
 
 def train(model, inputs, targets):
@@ -71,7 +71,7 @@ def train(model, inputs, targets):
         accuracy_est[epoch] = np.asarray(current_accuracy).mean()
         print_loss(losses, epoch, losses[epoch], accuracy_est[epoch])
 
-        model.update_learning_rate()
+        #model.update_learning_rate()
         global_step.assign_add(1)
         log_loss(np.asarray(losses[epoch]))
         log_weight(model.params())
