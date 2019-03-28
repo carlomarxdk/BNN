@@ -5,19 +5,8 @@ from binary_neuron.data_loader import data, labels
 from binary_neuron.model import Model
 from binary_neuron.train import train
 
-model = Model()
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-train(model, data, labels, epochs=50)
-=======
-=======
->>>>>>> parent of 97db9b1... Update
-=======
->>>>>>> parent of 97db9b1... Update
-=======
->>>>>>> parent of 97db9b1... Update
+model = Model(binary=True)
+train(model, data, labels, epochs=100)
 
 train(model, data, labels, epochs=100)
 >>>>>>> parent of 97db9b1... Update
