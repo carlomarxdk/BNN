@@ -1,20 +1,31 @@
 import tensorflow as tf
 
 @tf.custom_gradient
-def binarize(x):
+def binarize_(x):
     def grad(dy):
-        dy = tf.clip_by_value(dy, -1, 1)
+        dy = binary_tanh_unit(tf.identity(dy))
         return dy
-        #return dy
     return tf.sign(x), grad
-    ##return x, grad
 
 @tf.custom_gradient
-def round(x):
+def binarize(x):
     def grad(dy):
-        #return tf.clip_by_value(dy, -1, 1)
+        #dy = binary_tanh_unit(tf.identity(dy))
         return dy
-    return tf.round(x), grad
+    return tf.sign(binary_tanh_unit(x)), grad
+
+def hard_sigmoid(x):
+    return tf.clip_by_value((x + 1.) / 2, 0, 1)
+
+def binary_tanh_unit(x):
+    return 2 * hard_sigmoid(x) - 1
+
+def round(x):
+    return tf.round(x)
+
+
+
+
 
 
 def data(features, labels, batch_size):

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 num_samples = 1500
-noise = 0.1
+noise = 0.2
 
 ##[X, y] = datasets.make_moons(n_samples=num_samples, shuffle=True, noise=noise, random_state=None)
 
