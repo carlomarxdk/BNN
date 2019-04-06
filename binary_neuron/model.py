@@ -1,46 +1,45 @@
 import tensorflow as tf
-from binary_neuron.utils import binarize, round
 import numpy as np
+from utils import binarize
+from BinaryLayer import *
+
+class Model(tf.keras.Model):
+    def __init__(self,
+                 n_classes,
+                 n_features,
+                 n_hidden_units= 50,
+                 learning_rate= 0.01,
+                 epochs = 10,
+                 decay = 0.9,
+                 batch_size = 30,
+                 name = 'BinaryLayer',
+                 **kwargs):
+        super(Model, self).__init__(name=name, **kwargs)
+        self.n_classes = n_classes
+        self.n_features = n_features
+        self.n_hidden_units = n_hidden_units
+        self.epochs = epochs
+        self.learning_rate = learning_rate
+        self.decay = decay
+        self.batch_size = batch_size
+        self.l_1 = BinaryLayer(num_outputs=10)
+        self.l_2 = BinaryLayer(num_outputs=self.n_hidden_units)
+        self.l_output = BinaryLayer(num_outputs=2)
 
 
-class Model(object):
-    def __init__(self):
-        self.weights = [
-            tf.Variable(tf.random.uniform([100, 2], minval=-1.0, maxval=1.0, dtype=tf.float32)),
-            tf.Variable(tf.random.uniform([50, 100], minval=-1.0, maxval=1.0, dtype=tf.float32)),
-            tf.Variable(tf.random.uniform([1, 50], minval=-1.0, maxval=1.0, dtype=tf.float32))
-        ]
+    def forward(self, inputs, in_training_mode, binary=True):
+        hidden = self.l_1(inputs, binary=binary)
+        hidden = tf.keras.layers.BatchNormalization()(hidden, training=in_training_mode)
 
-    def params(self):
-        return self.weights
+        hidden = self.l_output(hidden, binary=False)
+        out = tf.nn.log_softmax(hidden)
+        out = tf.cast(out, dtype=tf.float32)
+        return out
 
-    def update(self, gradients, learning_rate):
-        for idx, weight in enumerate(self.weights):
-            weight.assign_sub(tf.clip_by_value(gradients[idx], -1.0, 1.0) * learning_rate)
+    def __call__(self, inputs,  *args, **kwargs):
+        self.forward(inputs, in_training_mode=True, binary=False)
 
-    def __call__(self, x):
-        x = tf.convert_to_tensor(x[np.newaxis].T, dtype=tf.float32)
+    def prediction(self, inputs):
+        logits = self.forward(inputs, in_training_mode=False)
+        return tf.argmax(logits, axis = 1)
 
-        for weight in self.weights[:-1]:
-            weight = binarize(weight)
-            x = tf.linalg.matmul(weight, x)
-            x = binarize(x)
-
-        last_weight = self.weights[-1]
-        last_weight = binarize(last_weight)
-
-        out = tf.linalg.matmul(last_weight, x)
-        out = tf.sigmoid(out)
-        out = round(out)
-        return tf.reshape(out, [-1])
-
-
-if __name__ == "__main__":
-    tf.enable_eager_execution()
-
-    # graph = tf.Graph()
-    # sess = tf.Session()  # graph=graph)
-    # with sess.as_default():
-    model = Model()
-    model.update([tf.random.uniform([10, 2])], 1)
-    print('done')

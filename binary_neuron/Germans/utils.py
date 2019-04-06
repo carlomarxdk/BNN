@@ -23,12 +23,18 @@ def binary_tanh_unit(x):
 def round(x):
     return tf.round(x)
 
-
-
-
-
-
 def data(features, labels, batch_size):
     dataset = tf.data.Dataset.from_tensor_slices(((features), labels))
     dataset = dataset.batch(batch_size)
     return dataset
+
+def loss(model, x,y):
+    y_ = model.forward(x, training=False)
+    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y, logits=y_))
+    return loss
+
+def grad(model, inputs, targets):
+  with tf.GradientTape() as tape:
+    loss_value = loss(model, inputs, targets)
+  return loss_value, tape.gradient(loss_value, model.trainable_variables)
+

@@ -1,23 +1,16 @@
 import tensorflow as tf
-
 tf.enable_eager_execution()
-from binary_neuron.data_loader import data, labels
-from binary_neuron.model import Model
-from binary_neuron.train import train
 
-model = Model()
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-train(model, data, labels, epochs=50)
-=======
-=======
->>>>>>> parent of 97db9b1... Update
-=======
->>>>>>> parent of 97db9b1... Update
-=======
->>>>>>> parent of 97db9b1... Update
+import sklearn
+import numpy as np
+from Train import *
+from Model import *
 
-train(model, data, labels, epochs=100)
->>>>>>> parent of 97db9b1... Update
+from DataGenerator import *
+
+data = DataGenerator(num_samples=1500, noise=0.2)
+[X_train, y_train] = data.train(num_observations=1000)
+num_feature = data.num_features()
+
+model = Model(n_classes=2, n_features=2)
+train(model, X_train, y_train)

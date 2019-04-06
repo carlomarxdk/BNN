@@ -1,46 +1,47 @@
 import tensorflow as tf
+from tensorflow import contrib
+from utils import *
+from Logs import *
 import numpy as np
-import matplotlib.pyplot as plt
 
+summary_writer = tf.contrib.summary.create_file_writer('logs', flush_millis=10000)
+summary_writer.set_as_default()
+global_step = tf.train.get_or_create_global_step()
 
-def loss(output, target):
-    target = tf.convert_to_tensor(target, dtype=tf.float32)
-    return tf.reduce_mean(tf.square(output - target))
+def train(model, inputs, targets):
+    dataset = data(inputs, targets, model.batch_size)
+    tfe = contrib.eager
 
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01 )
 
-def backward(model, inputs, targets, loss, learning_rate):
-    with tf.GradientTape() as t:
-        current_loss = loss(model(inputs), targets)
-    # print('Inputs: ', inputs.numpy())
-    # print('Target: ', targets.numpy())
-    # print('Predictions: ', model(inputs).numpy())
-    # print('Losses: ', current_loss)
-    # print('Params: ', model.params())
+    global_step = tf.Variable(0)
 
-    gradients = t.gradient(current_loss, model.params())
+    # keep results for plotting
+    train_loss_results = []
+    train_accuracy_results = []
 
-    # print('Gradients: ', gradients)
-    model.update(gradients, learning_rate)
+    for epoch in range(model.epochs):
+        epoch_loss_avg = tfe.metrics.Mean()
+        epoch_accuracy = tfe.metrics.Accuracy()
 
+        # Training loop - using batches of 32
+        for x, y in dataset:
+            # Optimize the model
+            loss_value, grads = grad(model, x, y)
+            optimizer.apply_gradients(zip(grads, model.trainable_variables),
+                                      global_step)
 
-def train(model, inputs, targets, epochs=10):
-    plt.scatter(inputs[:, 0], inputs[:, 1], s=40, c=targets, cmap=plt.cm.Spectral)
-    plt.show()
-    losses = np.zeros(epochs)
-    for epoch in range(epochs):
-        current_loss = []
-        for idx, input in enumerate(inputs):
-            target = targets[idx]
-            current_loss.append(loss(model(input), target))
+            # Track progress
+            epoch_loss_avg(loss_value)  # add current batch loss
+            # compare predicted label to actual label
+            epoch_accuracy(tf.argmax(model.forward(x, in_training_mode=False), axis=1, output_type=tf.int32), y)
 
-            backward(model, input, target, loss, learning_rate=1e-4)
+        # end epoch
+        train_loss_results.append(epoch_loss_avg.result())
+        train_accuracy_results.append(epoch_accuracy.result())
 
-        print('Epoch %2d: loss=%2.5f' %
-              (epoch, np.asarray(current_loss).mean()))
-        losses[epoch] = np.asarray(current_loss).mean()
-    plt.plot(losses)
-    plt.show()
+        global_step.assign_add(1)
+        log_prediction(model)
 
-    targets = np.asarray([model(input).numpy() for input in inputs]).flatten()
-    plt.scatter(inputs[:, 0], inputs[:, 1], s=40, c=targets, cmap=plt.cm.Spectral)
-    plt.show()
+        print("Epoch {:03d}: Loss: {:.3f} | Accuracy: {:.3f}".format(epoch,epoch_loss_avg.result(),
+                                                  epoch_accuracy.result()))
