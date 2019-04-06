@@ -12,8 +12,11 @@ class BinaryLayer(tf.keras.layers.Layer):
                                         initializer = tf.initializers.random_normal(),
                                         trainable=True)
 
-    def call(self, input, binary = True):
-        if binary:
-            return tf.matmul(binarize(input), binarize(self.kernel))
-        return tf.matmul(input, self.kernel)
+    def call(self, input, is_binary = True, is_first=False):
+        tf.assign(self.kernel, clip_weight(self.kernel))
+        if is_first:
+            return tf.matmul(binarize(input, binary=False), binarize(self.kernel, binary=is_binary))
+
+        result = tf.matmul(binarize(input, binary=is_binary), binarize(self.kernel, binary=is_binary))
+        return tf.nn.dropout(result, 0.7)
 

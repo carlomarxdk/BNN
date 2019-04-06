@@ -4,7 +4,7 @@ from utils import *
 from Logs import *
 import numpy as np
 
-summary_writer = tf.contrib.summary.create_file_writer('logs', flush_millis=10000)
+summary_writer = tf.contrib.summary.create_file_writer('logs', flush_millis=10)
 summary_writer.set_as_default()
 global_step = tf.train.get_or_create_global_step()
 
@@ -12,7 +12,7 @@ def train(model, inputs, targets):
     dataset = data(inputs, targets, model.batch_size)
     tfe = contrib.eager
 
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01 )
+    optimizer = tf.train.AdamOptimizer(learning_rate=model.learning_rate,   )
 
     global_step = tf.Variable(0)
 
@@ -28,13 +28,14 @@ def train(model, inputs, targets):
         for x, y in dataset:
             # Optimize the model
             loss_value, grads = grad(model, x, y)
+            #if epoch > 10: print(grads)
             optimizer.apply_gradients(zip(grads, model.trainable_variables),
                                       global_step)
 
             # Track progress
             epoch_loss_avg(loss_value)  # add current batch loss
             # compare predicted label to actual label
-            epoch_accuracy(tf.argmax(model.forward(x, in_training_mode=False), axis=1, output_type=tf.int32), y)
+            epoch_accuracy(model.predictions(x), y)
 
         # end epoch
         train_loss_results.append(epoch_loss_avg.result())
