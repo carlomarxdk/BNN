@@ -4,11 +4,13 @@ import numpy as np
 
 
 class Model(object):
-    def __init__(self):
+    def __init__(self, classes=2):
         self.weights = [
-            tf.get_variable('weight', [100, 5], initializer=tf.contrib.layers.xavier_initializer()),
-            tf.get_variable('weight', [50, 100], initializer=tf.contrib.layers.xavier_initializer()),
-            tf.get_variable('weight', [2, 50], initializer=tf.contrib.layers.xavier_initializer())
+            tf.get_variable('weight', [200, 5], initializer=tf.contrib.layers.xavier_initializer()),
+            tf.get_variable('weight', [200, 200], initializer=tf.contrib.layers.xavier_initializer()),
+            tf.get_variable('weight', [200, 200], initializer=tf.contrib.layers.xavier_initializer()),
+            tf.get_variable('weight', [200, 200], initializer=tf.contrib.layers.xavier_initializer()),
+            tf.get_variable('weight', [classes, 200], initializer=tf.contrib.layers.xavier_initializer())
         ]
 
     def params(self):
