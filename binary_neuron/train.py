@@ -3,63 +3,43 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot(inputs, model):
-    targets = np.asarray([model(input).numpy() for input in inputs]).flatten()
-    plt.scatter(inputs[:, 0], inputs[:, 1], s=40, c=targets, cmap=plt.cm.Spectral)
+def plot_grid(model, resolution=10):
+    grid = np.asarray([(i / 100, j / 100) for j in range(-50, 100, resolution) for i in range(-100, 200, resolution)])
+    colors = {0: '#de0000', 1: '#1f2b7b'}
+    preds = np.argmax(model(tf.convert_to_tensor(grid)).numpy(), axis=1)
+    labels = [colors[pred] for pred in preds]
+
+    plt.scatter(grid[:, 0], grid[:, 1], s=40, c=labels, cmap=plt.cm.Spectral)
     plt.show()
 
 
-def loss(output, target):
-    target = tf.convert_to_tensor(target, dtype=tf.float32)
-    return tf.reduce_mean(tf.square(output - target))
+def loss(X, Y):
+    return tf.losses.sparse_softmax_cross_entropy(labels=Y, logits=X)
 
 
-def backward(model, inputs, targets, loss, learning_rate):
+def backward(model, X, Y, optimizer):
     with tf.GradientTape() as t:
-        current_loss = loss(model(inputs), targets)
-    # print('Inputs: ', inputs.numpy())
-    # print('Target: ', targets.numpy())
-    # print('Predictions: ', model(inputs).numpy())
-    # print('Losses: ', current_loss)
-    # print('Params: ', model.params())
-
-    gradients = t.gradient(current_loss, model.params())
-
-    _gradients = []
-    for gradient in gradients:
-        max = tf.norm(gradient)
-        if not tf.equal(max, 0):
-            _gradients.append(gradient / max)
-        else:
-            _gradients.append(gradient)
-    gradients = _gradients
-
-    model.update(gradients, learning_rate)
+        pred = model(X)
+        current_loss = loss(pred, Y)
+        grads = t.gradient(current_loss, model.params())
+        optimizer.apply_gradients(zip(grads, model.params()))
+    return current_loss
 
 
-def train(model, inputs, targets, epochs=10):
-    plt.scatter(inputs[:, 0], inputs[:, 1], s=40, c=targets, cmap=plt.cm.Spectral)
-    plt.show()
+def train(model, data, optimizer, epochs=10, batch_size=50, print_freq=5):
     losses = np.zeros(epochs)
     for epoch in range(epochs):
         current_loss = []
-        for idx, input in enumerate(inputs):
-            target = targets[idx]
-            current_loss.append(loss(model(input), target))
+        for batch, (X, Y) in enumerate(data):
+            if batch <= batch_size:
+                current_loss.append(backward(model, X, Y, optimizer))
+            else:
+                break
 
-            backward(model, input, target, loss, learning_rate=1e-3)
-
-        print('Epoch %2d: loss=%2.5f' %
-              (epoch, np.asarray(current_loss).mean()))
+        print(f'Epoch {str(epoch).zfill(2)}: loss={round(np.asarray(current_loss).mean(), 3)}')
         losses[epoch] = np.asarray(current_loss).mean()
-        if epoch % 5 == 0:
-            grid = np.asarray([(i / 100, j / 100) for j in range(-50, 100, 10) for i in range(-100, 200, 10)])
-            plot(grid, model)
+        if epoch % print_freq == 0:
+            plot_grid(model, resolution=5)
 
     plt.plot(losses)
     plt.show()
-
-    plot(inputs, model)
-
-    grid = np.asarray([(i / 100, j / 100) for j in range(-50, 100, 5) for i in range(-100, 200, 5)])
-    plot(grid, model)

@@ -114,3 +114,5 @@ dmypy.json
 .pyre/
 
 \.idea/
+
+binary_neuron/Germans/logs/
