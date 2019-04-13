@@ -29,6 +29,6 @@ def round(x):
 
 
 def data(features, labels, batch_size):
-    dataset = tf.data.Dataset.from_tensor_slices(((features), labels))
+    dataset = tf.data.Dataset.from_tensor_slices((features, labels))
     dataset = dataset.batch(batch_size)
     return dataset
