@@ -4,8 +4,12 @@ from utils import *
 
 
 def log_prediction(model):
-    grid = np.asarray([(i/40 , j/40 ) for j in range(-50, 50) for i in range(-50, 50)])
-    x = tf.argmax(tf.transpose(model.forward(tf.Variable(grid, dtype=tf.float32), in_training_mode=False)))
+    x_ = np.linspace(-20., 20., 100)
+    y_ = np.linspace(-20., 20., 100)
+    X,Y = np.meshgrid(x_,y_)
+    grid = np.array([X.flatten(),Y.flatten()], dtype=np.float32).T
+
+    x = tf.argmax(tf.transpose(model.forward(grid, in_training_mode=False)))
     image = tf.cast(tf.reshape(tf.reshape(x, [-1]), [-1, 100, 100, 1]), dtype=tf.float32)
     with tf.contrib.summary.always_record_summaries():
         tf.contrib.summary.image('Boundry', image)

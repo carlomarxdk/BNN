@@ -9,14 +9,14 @@ class BinaryLayer(tf.keras.layers.Layer):
     def build(self, input_shape):
         self.kernel = self.add_variable("kernel",
                                         shape=[int(input_shape[-1]), self.num_outputs],
-                                        initializer = tf.initializers.random_normal(),
+                                        initializer = tf.contrib.layers.xavier_initializer(),
                                         trainable=True)
 
-    def call(self, input, is_binary = True, is_first=False):
-        tf.assign(self.kernel, clip_weight(self.kernel))
-        if is_first:
-            return tf.matmul(binarize(input, binary=False), binarize(self.kernel, binary=is_binary))
+    def call(self, input, is_binary = True, dropout=0.999):
+        input = binarize(input, binary=is_binary)
+        weight = binarize(self.kernel, binary=True)
+        output = tf.keras.backend.dot(input,weight)
 
-        result = tf.matmul(binarize(input, binary=is_binary), binarize(self.kernel, binary=is_binary))
-        return tf.nn.dropout(result, 0.7)
+       # return tf.nn.dropout(result, dropout)
+        return output
 

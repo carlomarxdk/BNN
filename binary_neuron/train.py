@@ -3,6 +3,9 @@ from tensorflow import contrib
 from utils import *
 from Logs import *
 import numpy as np
+import matplotlib.pyplot as plt
+
+
 
 summary_writer = tf.contrib.summary.create_file_writer('logs', flush_millis=10)
 summary_writer.set_as_default()
@@ -12,7 +15,7 @@ def train(model, inputs, targets):
     dataset = data(inputs, targets, model.batch_size)
     tfe = contrib.eager
 
-    optimizer = tf.train.AdamOptimizer(learning_rate=model.learning_rate,   )
+    optimizer = tf.train.AdamOptimizer(learning_rate=model.learning_rate)
 
     global_step = tf.Variable(0)
 
@@ -35,7 +38,7 @@ def train(model, inputs, targets):
             # Track progress
             epoch_loss_avg(loss_value)  # add current batch loss
             # compare predicted label to actual label
-            epoch_accuracy(model.predictions(x), y)
+            epoch_accuracy(model.predictions(x), tf.reshape(y,[len(y),-1]))
 
         # end epoch
         train_loss_results.append(epoch_loss_avg.result())
@@ -43,6 +46,7 @@ def train(model, inputs, targets):
 
         global_step.assign_add(1)
         log_prediction(model)
+
 
         print("Epoch {:03d}: Loss: {:.3f} | Accuracy: {:.3f}".format(epoch,epoch_loss_avg.result(),
                                                   epoch_accuracy.result()))
