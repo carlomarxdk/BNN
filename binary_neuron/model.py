@@ -6,9 +6,7 @@ import numpy as np
 class Model(object):
     def __init__(self, classes=2):
         self.weights = [
-            tf.get_variable('weight', [200, 5], initializer=tf.contrib.layers.xavier_initializer()),
-            tf.get_variable('weight', [200, 200], initializer=tf.contrib.layers.xavier_initializer()),
-            tf.get_variable('weight', [200, 200], initializer=tf.contrib.layers.xavier_initializer()),
+            tf.get_variable('weight', [200, 7], initializer=tf.contrib.layers.xavier_initializer()),
             tf.get_variable('weight', [200, 200], initializer=tf.contrib.layers.xavier_initializer()),
             tf.get_variable('weight', [classes, 200], initializer=tf.contrib.layers.xavier_initializer())
         ]
@@ -19,7 +17,14 @@ class Model(object):
     def __call__(self, x):
         # enriching data
         _x = x.numpy()
-        _x = np.asarray([_x[:, 0], _x[:, 1], _x[:, 0] * _x[:, 1], np.sin(_x[:, 0]), np.sin(_x[:, 1])])
+        _x = np.asarray([_x[:, 0],
+                         _x[:, 1],
+                         _x[:, 0] * _x[:, 1],
+                         np.sin(_x[:, 0]),
+                         np.cos(_x[:, 1]),
+                         np.square(_x[:, 0]),
+                         np.square(_x[:, 1])
+                         ])
         x = tf.convert_to_tensor(_x, dtype=tf.float32)
 
         for weight in self.weights[:-1]:

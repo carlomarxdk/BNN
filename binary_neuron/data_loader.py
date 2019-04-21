@@ -6,7 +6,7 @@ import numpy as np
 
 def generate_data(num_samples=1000, batch_size=100):
     # [features, labels] = datasets.make_blobs(n_samples=num_samples, shuffle=True, random_state=None)
-    # [features, labels] = datasets.make_circles(n_samples=num_samples, shuffle=True, noise=0.05, random_state=None)
+    # [features, labels] = datasets.make_circles(n_samples=num_samples, shuffle=True, noise=0.01, random_state=None)
     [features, labels] = datasets.make_moons(n_samples=num_samples, shuffle=True, noise=0.05, random_state=None)
 
     dataset = tf.data.Dataset.from_tensor_slices((features, labels))

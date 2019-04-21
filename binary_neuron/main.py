@@ -7,7 +7,7 @@ from binary_neuron.data_loader import generate_data
 from binary_neuron.model import Model
 from binary_neuron.train import train
 
-dataset, [features, labels, sizes] = generate_data(15000, 20)
+dataset, [features, labels, sizes] = generate_data(num_samples=15000, batch_size=10)
 
 model = Model(classes=2)
 optimizer = tf.train.AdamOptimizer(1e-4)
