@@ -3,9 +3,9 @@ import tensorflow as tf
 from utils import *
 
 
-def log_prediction(model):
-    x_ = np.linspace(-20., 20., 100)
-    y_ = np.linspace(-20., 20., 100)
+def log_prediction(model, range):
+    x_ = np.linspace(range[0], range[1], 100)
+    y_ = np.linspace(range[0], range[1], 100)
     X,Y = np.meshgrid(x_,y_)
     grid = np.array([X.flatten(),Y.flatten()], dtype=np.float32).T
     grid =  np.transpose(np.asarray([grid[:, 0],

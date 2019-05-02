@@ -12,10 +12,12 @@ summary_writer.set_as_default()
 global_step = tf.train.get_or_create_global_step()
 
 def train(model, inputs, targets):
+    min = np.min(inputs)
+    max = np.max(inputs)
     dataset = data(inputs, targets, model.batch_size)
     tfe = contrib.eager
 
-    optimizer = tf.train.AdamOptimizer(learning_rate=model.learning_rate, )
+    optimizer = tf.train.AdamOptimizer(learning_rate=model.learning_rate, beta1=model.decay )
 
     global_step = tf.Variable(0)
 
@@ -46,7 +48,7 @@ def train(model, inputs, targets):
         train_accuracy_results.append(epoch_accuracy.result())
 
         global_step.assign_add(1)
-        log_prediction(model)
+        log_prediction(model, range=(min,max))
 
 
         print("Epoch {:03d}: Loss: {:.3f} | Accuracy: {:.3f}".format(epoch,epoch_loss_avg.result(),
