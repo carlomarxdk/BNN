@@ -15,7 +15,7 @@ def train(model, inputs, targets):
     dataset = data(inputs, targets, model.batch_size)
     tfe = contrib.eager
 
-    optimizer = tf.train.AdamOptimizer(learning_rate=model.learning_rate)
+    optimizer = tf.train.AdamOptimizer(learning_rate=model.learning_rate, )
 
     global_step = tf.Variable(0)
 

@@ -14,7 +14,7 @@ def binary_tanh_unit(x):
 def hard_tanh(x):
     def grad(dy):
         return dy
-    return tf.clip_by_value(x, 0, 1.), grad
+    return tf.clip_by_value(x, -1, 1.), grad
 
 
 @tf.custom_gradient
