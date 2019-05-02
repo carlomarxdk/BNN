@@ -8,17 +8,17 @@ class BinaryLayer(tf.keras.layers.Layer):
 
     def build(self, input_shape):
         self.kernel = self.add_variable("kernel",
-                                        shape=[self.num_outputs, int(input_shape[-1])],
+                                        shape=[int(input_shape[-1]), self.num_outputs],
                                         initializer = tf.contrib.layers.xavier_initializer(),
                                         trainable=True)
 
     def call(self, input, is_binary = True, dropout=0.999):
         #input = binarize(input, binary=is_binary)
         weight = binarize(self.kernel, binary=True)
-        output = tf.matmul(weight,tf.transpose(input))
+        output = tf.matmul(input, weight)
         if is_binary:
             output = hard_tanh(output)
 
        # return tf.nn.dropout(result, dropout)
-        return tf.transpose(output)
+        return output
 

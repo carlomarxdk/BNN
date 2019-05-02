@@ -49,8 +49,9 @@ def grad(model, inputs, targets):
     return loss_value, tape.gradient(loss_value, model.trainable_variables)
 
 def loss(model, x,y):
-    y_ = tf.transpose(model.forward(x, in_training_mode=True))
-    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=y, logits=y_))
+    y_ = model.forward(x, in_training_mode=True)
+    loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y, logits=y_))
+
     return loss
 
 def loss0(model,x,y):

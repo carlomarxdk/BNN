@@ -16,7 +16,7 @@ data = DataGenerator(num_samples=1500, noise=0.2)
 
 num_features = data.num_features()
 
-model = Model(n_classes=2, n_features=num_features, learning_rate=1e-5, epochs=50, decay=0.9)
+model = Model(n_classes=2, n_features=num_features, learning_rate=1e-5, epochs=100, decay=0.9)
 train(model, X_train, y_train)
 
 
