@@ -20,9 +20,9 @@ def hard_tanh(x):
 @tf.custom_gradient
 def binarize(x, binary=True):
     def grad(dy):
-      #  comparison = tf.greater(tf.math.abs(dy), tf.constant(1.))
-       # dy = tf.where(comparison, tf.zeros_like(dy), dy)
-        #dy = hard_tanh(dy)
+        comparison = tf.greater(tf.math.abs(dy), tf.constant(1.))
+        dy = tf.where(comparison, tf.zeros_like(dy), dy)
+        dy = hard_tanh(dy)
         return dy
     if binary:
         x = tf.sign(x)
