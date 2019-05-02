@@ -13,16 +13,14 @@ from sklearn.preprocessing import PolynomialFeatures
 
 data = DataGenerator(num_samples=1500, noise=0.2)
 [X_train, y_train] = data.train(num_observations=1000)
-transformer = PolynomialFeatures(degree=3, include_bias=False)
-transformer.fit(X_train)
 
-num_feature = data.num_features()
+num_features = data.num_features()
 
-model = Model(n_classes=2, transformer=transformer, n_features=10, learning_rate=1e-5, epochs=50)
+model = Model(n_classes=2, n_features=num_features, learning_rate=1e-5, epochs=50)
 train(model, X_train, y_train)
 
-model.predictions(X_train[1,:].reshape(1,-1), to_print=True)
+model.predictions(X_train[1,:].reshape(1,-1))
 print(y_train[1])
 
-model.predictions(X_train[0,:].reshape(1,-1), to_print=True)
+model.predictions(X_train[0,:].reshape(1,-1))
 print(y_train[0])

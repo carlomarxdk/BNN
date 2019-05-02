@@ -38,7 +38,8 @@ def train(model, inputs, targets):
             # Track progress
             epoch_loss_avg(loss_value)  # add current batch loss
             # compare predicted label to actual label
-            epoch_accuracy(model.predictions(x), tf.reshape(y,[len(y),-1]))
+            epoch_accuracy(model.predictions(x), y)
+
 
         # end epoch
         train_loss_results.append(epoch_loss_avg.result())

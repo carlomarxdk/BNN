@@ -8,8 +8,16 @@ def log_prediction(model):
     y_ = np.linspace(-20., 20., 100)
     X,Y = np.meshgrid(x_,y_)
     grid = np.array([X.flatten(),Y.flatten()], dtype=np.float32).T
+    grid =  np.transpose(np.asarray([grid[:, 0],
+                         grid[:, 1],
+                         grid[:, 0] * grid[:, 1],
+                         np.sin(grid[:, 0]),
+                         np.cos(grid[:, 1]),
+                         np.square(grid[:, 0]),
+                         np.square(grid[:, 1])
+                         ]))
 
-    x = tf.argmax(tf.transpose(model.forward(grid, in_training_mode=False)))
+    x = tf.transpose(model.predictions(grid))
     image = tf.cast(tf.reshape(tf.reshape(x, [-1]), [-1, 100, 100, 1]), dtype=tf.float32)
     with tf.contrib.summary.always_record_summaries():
         tf.contrib.summary.image('Boundry', image)
