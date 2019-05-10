@@ -49,7 +49,9 @@ def grad(model, inputs, targets):
     return loss_value, tape.gradient(loss_value, model.trainable_variables)
 
 def loss(model, x,y):
+
     y_ = model.forward(x, in_training_mode=True)
+
     loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y, logits=y_))
 
     return loss
@@ -75,4 +77,3 @@ def accuracy__(model, input, target):
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print(correct_prediction)
     return accuracy
-
