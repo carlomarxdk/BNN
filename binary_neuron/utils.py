@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 
 
@@ -23,3 +24,14 @@ def round(x):
         return dy
 
     return tf.round(x), grad
+
+
+def enrich_data(features):
+    return np.asarray([features[:, 0],
+                       features[:, 1],
+                       features[:, 0] * features[:, 1],
+                       np.sin(features[:, 0]),
+                       np.cos(features[:, 1]),
+                       np.square(features[:, 0]),
+                       np.square(features[:, 1])
+                       ]).T
