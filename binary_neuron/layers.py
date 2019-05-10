@@ -3,21 +3,6 @@ import tensorflow as tf
 from binary_neuron.utils import binarize, hard_tanh
 
 
-def binaryLinearLayer(num_out, name=None):
-    def binary_linear_layer(x):
-        with tf.variable_scope(name, 'BinaryLinear', [x]):
-            num_in = x.get_shape().as_list()[0]
-            x_binary = binarize(x)
-            w = tf.get_variable('weight', [num_out, num_in],
-                                initializer=tf.contrib.layers.xavier_initializer())
-            # w = hard_tanh(w)
-            w_binary = binarize(w)
-            out = tf.matmul(w_binary, x_binary)
-        return out
-
-    return binary_linear_layer
-
-
 class BinaryLinearLayer(tf.keras.layers.Layer):
     def __init__(self, num_out, binarize_input=True):
         super(BinaryLinearLayer, self).__init__()
