@@ -1,3 +1,4 @@
+import pandas
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -5,7 +6,7 @@ from sklearn import datasets
 from binary_neuron.utils import enrich_data
 
 
-def generate_data(num_samples=1000, batch_size=100):
+def classification_dataset(num_samples=1000, batch_size=100):
     # [features, labels] = datasets.make_blobs(n_samples=num_samples, shuffle=True, random_state=None)
     # [features, labels] = datasets.make_circles(n_samples=num_samples, shuffle=True, noise=0.01, random_state=None)
     [features, labels] = datasets.make_moons(n_samples=num_samples, shuffle=True, noise=0.05, random_state=None)
@@ -24,7 +25,11 @@ def generate_data(num_samples=1000, batch_size=100):
     return dataset, [features, labels, sizes]
 
 
-if __name__ == "__main__":
-    _, [features, labels, sizes] = generate_data()
-    plt.scatter(features[:, 0], features[:, 1], s=40, c=labels, cmap=plt.cm.Spectral)
+def RNN_dataset(batch_size=100):
+    dataset = pandas.read_csv('airline_passengers.csv', usecols=[1], engine='python')
+    plt.plot(dataset)
     plt.show()
+
+
+if __name__ == "__main__":
+    RNN_dataset()
