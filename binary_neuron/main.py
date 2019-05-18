@@ -13,7 +13,6 @@ from binary_neuron.rnn.train import train
 ########################## Classification ####################################
 ##############################################################################
 
-
 # dataset, [features, labels, sizes] = classification_dataset(num_samples=15000, batch_size=10)
 #
 # model = ClassificationModel(classes=2)
