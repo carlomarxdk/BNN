@@ -62,22 +62,21 @@ class BinaryLSTMCell(Layer):
     @tf_utils.shape_type_conversion
     def build(self, input_shape):
         input_dim = input_shape[-1]
-        # self.kernel = self.add_weight(
-        #     shape=(input_dim, self.units * 4),
-        #     name='kernel',
-        #     initializer=self.kernel_initializer)
+
+        self.kernel = self.add_weight(
+            shape=(input_dim, self.units * 4),
+            name='kernel',
+            initializer=self.kernel_initializer)
+
         self.recurrent_kernel = self.add_weight(
             shape=(self.units, self.units * 4),
             name='recurrent_kernel',
             initializer=self.recurrent_initializer)
+
         self.built = True
 
     def _compute_carry_and_output(self, x, h_tm1, c_tm1):
-        """Computes carry and output using split kernels."""
-
-        x_b = (x)
-
-        # a = tf.concat([tf.transpose(x_f), h_tm1], axis=0)
+        (x_i, x_f, x_c, x_o) = x
 
         W_i = binarize(self.recurrent_kernel[:, :self.units])
         W_f = binarize(self.recurrent_kernel[:, self.units:self.units * 2])
@@ -85,46 +84,34 @@ class BinaryLSTMCell(Layer):
         W_o = binarize(self.recurrent_kernel[:, self.units * 3:])
 
         # f = sigmoid(W_f*[h_tm1, x])
-        f = self.recurrent_activation(x_b + K.dot(h_tm1, W_f))
+        f = self.recurrent_activation(x_i + K.dot(h_tm1, W_f))
 
         # i = sigmoid(W_i*[h_tm1, x])
-        i = self.recurrent_activation(x_b + K.dot(h_tm1, W_i))
+        i = self.recurrent_activation(x_f + K.dot(h_tm1, W_i))
 
         # c = f * c_tm1 + i * (tanh(W_c[h_tm1, x]))
-        c = f * c_tm1 + i * self.activation(x_b + K.dot(h_tm1, W_c))
+        c = f * c_tm1 + i * self.activation(x_c + K.dot(h_tm1, W_c))
 
         # sigmoid(W_o * [h_tm1, x])
-        o = self.recurrent_activation(x_b + K.dot(h_tm1, W_o))
-
-        # f = self.recurrent_activation(K.dot(W_f, a))
-        #
-        # # i = sigmoid(W_i*[h_tm1, x])
-        # i = self.recurrent_activation(K.dot(W_i, a))
-        #
-        # # c = f * c_tm1 + i * (tanh(W_c[h_tm1, x]))
-        # c = f * c_tm1 + i * self.activation(K.dot(W_c, a))
-        #
-        # # sigmoid(W_o * [h_tm1, x])
-        # o = self.recurrent_activation(K.dot(W_o, a))
+        o = self.recurrent_activation(x_o + K.dot(h_tm1, W_o))
 
         return c, o
 
     def call(self, inputs, states):
-        h_tm1 = states[0]  # previous memory state
-        c_tm1 = states[1]  # previous carry state
-        x = inputs
+        h_tm1 = hard_tanh(states[0])  # previous memory state
+        c_tm1 = hard_tanh(states[1])  # previous carry state
 
-        # x_i = K.dot(inputs_i, self.kernel[:, :self.units])
-        # x_f = K.dot(inputs_f, self.kernel[:, self.units:self.units * 2])
-        # x_c = K.dot(inputs_c, self.kernel[:, self.units * 2:self.units * 3])
-        # x_o = K.dot(inputs_o, self.kernel[:, self.units * 3:])
+        W_k_i = binarize(self.kernel[:, :self.units])
+        W_k_f = binarize(self.kernel[:, self.units:self.units * 2])
+        W_k_c = binarize(self.kernel[:, self.units * 2:self.units * 3])
+        W_k_o = binarize(self.kernel[:, self.units * 3:])
 
-        # x_i = inputs
-        # x_f = inputs
-        # x_c = inputs
-        # x_o = inputs
+        x_i = hard_tanh(K.dot(inputs, W_k_i))
+        x_f = hard_tanh(K.dot(inputs, W_k_f))
+        x_c = hard_tanh(K.dot(inputs, W_k_c))
+        x_o = hard_tanh(K.dot(inputs, W_k_o))
 
-        # x = (x_i, x_f, x_c, x_o)
+        x = (x_i, x_f, x_c, x_o)
         c, o = self._compute_carry_and_output(x, h_tm1, c_tm1)
 
         h = hard_tanh(o * self.activation(c))

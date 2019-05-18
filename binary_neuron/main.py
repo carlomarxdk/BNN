@@ -8,7 +8,7 @@ tf.enable_eager_execution()
 from binary_neuron.classification.model import ClassificationModel
 from binary_neuron.classification.data_loader import classification_dataset
 from binary_neuron.rnn.data_loader import RNN_dataset
-from binary_neuron.rnn.model import RNNModel
+from binary_neuron.rnn.model import RNNModel, BaselineRNNModel
 from binary_neuron.rnn.train import train
 
 ##############################################################################
@@ -44,16 +44,18 @@ from binary_neuron.rnn.train import train
 ################################# LSTM #######################################
 ##############################################################################
 
-LOOK_BACK = 1
+LOOK_BACK = 15
 
 [trainX, trainY, testX, testY, dataset] = RNN_dataset(look_back=LOOK_BACK)
 model = RNNModel(look_back=LOOK_BACK)
+# model = BaselineRNNModel(look_back=LOOK_BACK)
 
 model.compile(loss='mean_squared_error', optimizer='adam')
-model.fit(trainX, trainY, epochs=100, batch_size=1, verbose=2)
+model.fit(trainX, trainY, epochs=300, batch_size=6, verbose=2)
 
 plotRnnResults(model=model, trainX=trainX, trainY=trainY, testX=testX, testY=testY, dataset=dataset,
                look_back=LOOK_BACK)
+
 ##############################################################################
 ##############################################################################
 ##############################################################################
