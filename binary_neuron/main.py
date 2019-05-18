@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
+from binary_neuron.utils import plotRnnResults
+
 tf.enable_eager_execution()
 from binary_neuron.classification.model import ClassificationModel
 from binary_neuron.classification.data_loader import classification_dataset
@@ -44,12 +46,14 @@ from binary_neuron.rnn.train import train
 
 LOOK_BACK = 1
 
-[trainX, trainY] = RNN_dataset(look_back=LOOK_BACK)
+[trainX, trainY, testX, testY, dataset] = RNN_dataset(look_back=LOOK_BACK)
 model = RNNModel(look_back=LOOK_BACK)
 
 model.compile(loss='mean_squared_error', optimizer='adam')
-model.fit(trainX, trainY, epochs=10, batch_size=1, verbose=2)
+model.fit(trainX, trainY, epochs=100, batch_size=1, verbose=2)
 
+plotRnnResults(model=model, trainX=trainX, trainY=trainY, testX=testX, testY=testY, dataset=dataset,
+               look_back=LOOK_BACK)
 ##############################################################################
 ##############################################################################
 ##############################################################################

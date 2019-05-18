@@ -1,5 +1,3 @@
-import pandas
-import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from sklearn import datasets
@@ -57,7 +55,7 @@ def RNN_dataset(look_back=1):
     trainX = np.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
     testX = np.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
 
-    return [trainX, trainY]
+    return [trainX, trainY, testX, testY, dataset]
 
 
 if __name__ == "__main__":
