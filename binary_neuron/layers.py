@@ -1,14 +1,12 @@
 import tensorflow as tf
-
 from tensorflow.python.framework import tensor_shape
-from tensorflow.python.keras import activations
 from tensorflow.python.keras import initializers
 from tensorflow.python.keras.engine.base_layer import Layer
 from tensorflow.python.keras.utils import tf_utils
 from tensorflow.python.ops import array_ops
 from tensorflow.python.util import nest
 
-from binary_neuron.utils import binarize, hard_tanh
+from binary_neuron.utils import binarize, hard_tanh, sign
 from tensorflow.python.keras import backend as K
 
 
@@ -19,20 +17,29 @@ class BinaryLinearLayer(tf.keras.layers.Layer):
         self.binarize_input = binarize_input
 
     def build(self, input_shape):
-        self.weight = tf.get_variable('weight', [int(input_shape[-1]), self.num_out],
-                                      initializer=tf.contrib.layers.xavier_initializer(), dtype=tf.float32)
-        super(BinaryLinearLayer, self).build(input_shape)
+        self.weight = self.add_weight(name='weight',
+                                      shape=(int(input_shape[1]), self.num_out),
+                                      initializer='glorot_normal',
+                                      # initializer='he_normal',
+                                      trainable=True,
+                                      dtype=tf.float32)
 
     def call(self, x):
         if self.binarize_input:
             x = binarize(x)
-        weight = binarize(self.weight)
-        return tf.matmul(x, weight)
+        weight = tf.clip_by_value(self.weight, -1, 1)
+        weight_b = binarize(weight)
+        return tf.matmul(x, weight_b)
 
 
 class HardTanH(tf.keras.layers.Layer):
     def call(self, x):
         return hard_tanh(x)
+
+
+class Sign(tf.keras.layers.Layer):
+    def call(self, x):
+        return sign(x)
 
 
 class SoftMax(tf.keras.layers.Layer):
@@ -43,8 +50,6 @@ class SoftMax(tf.keras.layers.Layer):
 class BinaryLSTMCell(Layer):
     def __init__(self,
                  units,
-                 activation='tanh',
-                 recurrent_activation='hard_sigmoid',
                  kernel_initializer='glorot_uniform',
                  recurrent_initializer='orthogonal',
                  **kwargs):
@@ -84,16 +89,16 @@ class BinaryLSTMCell(Layer):
         W_o = binarize(self.recurrent_kernel[:, self.units * 3:])
 
         # f = sigmoid(W_f*[h_tm1, x])
-        f = self.recurrent_activation(x_i + K.dot(h_tm1, W_f))
+        f = hard_tanh(x_i + K.dot(h_tm1, W_f))
 
         # i = sigmoid(W_i*[h_tm1, x])
-        i = self.recurrent_activation(x_f + K.dot(h_tm1, W_i))
+        i = hard_tanh(x_f + K.dot(h_tm1, W_i))
 
         # c = f * c_tm1 + i * (tanh(W_c[h_tm1, x]))
-        c = f * c_tm1 + i * self.activation(x_c + K.dot(h_tm1, W_c))
+        c = hard_tanh(f * c_tm1 + i * hard_tanh(x_c + K.dot(h_tm1, W_c)))
 
         # sigmoid(W_o * [h_tm1, x])
-        o = self.recurrent_activation(x_o + K.dot(h_tm1, W_o))
+        o = hard_tanh(x_o + K.dot(h_tm1, W_o))
 
         return c, o
 
@@ -114,7 +119,7 @@ class BinaryLSTMCell(Layer):
         x = (x_i, x_f, x_c, x_o)
         c, o = self._compute_carry_and_output(x, h_tm1, c_tm1)
 
-        h = hard_tanh(o * self.activation(c))
+        h = hard_tanh(o * c)
         return h, [h, c]
 
 
