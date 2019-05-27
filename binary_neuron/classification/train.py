@@ -1,6 +1,8 @@
-import tensorflow as tf
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
+
+from binary_neuron.utils import enrich_data
 
 
 def plot_grid(model, resolution=50, sizes=[10, -10, 10, -10]):
@@ -10,9 +12,9 @@ def plot_grid(model, resolution=50, sizes=[10, -10, 10, -10]):
 
     res = range(resolution)
 
-    grid = np.asarray([[min_x + j * dx, min_y + i * dy] for j in res for i in res])
+    grid = enrich_data(np.asarray([[min_x + j * dx, min_y + i * dy] for j in res for i in res]))
     colors = {0: '#de0000', 1: '#1f2b7b', 2: '#cfde3c'}
-    preds = np.argmax(model(tf.convert_to_tensor(grid)).numpy(), axis=1)
+    preds = np.argmax(model(tf.convert_to_tensor(grid, dtype=tf.float32)).numpy(), axis=1)
     labels = [colors[pred] for pred in preds]
 
     plt.scatter(grid[:, 0], grid[:, 1], s=40, c=labels, cmap=plt.cm.Spectral)
@@ -27,8 +29,8 @@ def backward(model, X, Y, optimizer):
     with tf.GradientTape() as t:
         pred = model(X)
         current_loss = loss(pred, Y)
-        grads = t.gradient(current_loss, model.params())
-        optimizer.apply_gradients(zip(grads, model.params()))
+        grads = t.gradient(current_loss, model.trainable_variables)
+        optimizer.apply_gradients(zip(grads, model.trainable_variables))
     return current_loss
 
 
