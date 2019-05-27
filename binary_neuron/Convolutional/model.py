@@ -13,7 +13,7 @@ class Model(tf.keras.Model):
                  learning_rate=0.1,
                  epochs=10,
                  decay=1,
-                 batch_size=30,
+                 batch_size=32,
                  name='BinaryLayer',
                  **kwargs):
         super(Model, self).__init__(name=name, **kwargs)

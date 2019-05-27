@@ -10,8 +10,10 @@ from binary_neuron.Convolutional.model import *
 from binary_neuron.Convolutional.DataGenerator import *
 
 data = DataGenerator()
-X_train = data.train[0][:5000]
-y_train = data.train[1][:5000]
+X_train = data.train[0][:10000]
+y_train = data.train[1][:10000]
+X_test = data.test[0][:1000]
+y_test = data.test[1][:1000]
 
-model = Model(n_classes=10, learning_rate=1e-5, epochs=50, decay=0.99)
-train(model, X_train, y_train)
+model = Model(n_classes=10, learning_rate=1e-5, epochs=1000, decay=0.9999)
+train(model, X_train, y_train, X_test, y_test)
