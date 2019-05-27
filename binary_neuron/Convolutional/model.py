@@ -22,22 +22,40 @@ class Model(tf.keras.Model):
         self.learning_rate = learning_rate
         self.decay = decay
         self.batch_size = batch_size
-        self.l_1 = BinaryConv2D(filters=32, kernel_size=(5, 5), padding='valid')
-        self.pool_1 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2))
-        self.l_2 = BinaryConv2D(filters=64, kernel_size=(3, 3), padding='valid')
+        self.l_1 = BinaryConv2D(filters=48, kernel_size=(3, 3), padding='same')
+        self.l_2 = BinaryConv2D(filters=48, kernel_size=(3,3), padding='valid')
         self.pool_2 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2))
+        #dropout
+        self.l_3 = BinaryConv2D(filters=96, kernel_size=(3,3), padding='same')
+        self.l_4 = BinaryConv2D(filters=96, kernel_size=(3,3), padding='valid')
+        self.pool_4 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2))
+        self.l_5 = BinaryConv2D(filters=192, kernel_size=(3,3), padding='same')
+        self.l_6 = BinaryConv2D(filters=192, kernel_size=(3,3), padding='valid')
+        self.pool_6 = tf.keras.layers.MaxPooling2D(pool_size=(2, 2))
 
+        self.dense_1 = BinaryLayer(num_outputs=512)
+        self.dense_2 = BinaryLayer(num_outputs=256)
         self.l_output = BinaryLayer(num_outputs=n_classes)
 
     def forward(self, inputs, in_training_mode, binary=True):
         transformed = tf.cast(inputs, dtype=tf.float32)
         hidden = self.l_1(transformed, is_binary=True)
-        hidden = self.pool_1(hidden)
         hidden = self.l_2(hidden, is_binary=True)
         hidden = self.pool_2(hidden)
-        hidden = tf.reshape(hidden, shape=[-1, hidden.shape[1] * hidden.shape[2] * hidden.shape[3]]) #depends on the size of the hidden tensor
-        hidden = self.l_output(hidden, is_binary=False)
-        out = tf.nn.softmax(hidden)
+
+        hidden = self.l_3(hidden, is_binary=True)
+        hidden = self.l_4(hidden, is_binary=True)
+        hidden = self.pool_4(hidden)
+
+        hidden = self.l_5(hidden, is_binary=True)
+        hidden = self.l_6(hidden, is_binary=True)
+        hidden = self.pool_6(hidden)
+        flat = tf.reshape(hidden, shape=[-1, hidden.shape[1] * hidden.shape[2] * hidden.shape[3]]) #depends on the size of the hidden tensor
+
+        flat = self.dense_1(flat, is_binary=True)
+        flat = self.dense_2(flat, is_binary=True)
+        flat = self.l_output(flat, is_binary=False)
+        out = tf.nn.softmax(flat)
         out = tf.cast(out, dtype=tf.float32)
         return out
 
