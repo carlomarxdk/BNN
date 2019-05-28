@@ -2,8 +2,6 @@ import numpy as np
 import tensorflow as tf
 from utils import *
 
-train = tf.summary.FileWriter('./logs/train')
-test = tf.summary.FileWriter('./logs/val')
 
 def log_prediction(model, range):
     x_ = np.linspace(range[0], range[1], 100)
