@@ -2,6 +2,8 @@ import numpy as np
 import tensorflow as tf
 from utils import *
 
+train = tf.summary.FileWriter('./logs/train')
+test = tf.summary.FileWriter('./logs/val')
 
 def log_prediction(model, range):
     x_ = np.linspace(range[0], range[1], 100)
@@ -27,9 +29,10 @@ def log_loss(loss):
         tf.contrib.summary.scalar('Cross_Entropy_Loss_Per_Epoch', loss)
 
 
-def log_accuracy(accuracy):
+def log_accuracy(accuracy, name):
     with tf.contrib.summary.always_record_summaries():
-        tf.contrib.summary.scalar('Accuracy_Per_Epoch', accuracy)
+        tf.contrib.summary.scalar(name, accuracy)
+
 
 def log_weight(w):
     with tf.contrib.summary.always_record_summaries():

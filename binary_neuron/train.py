@@ -46,7 +46,11 @@ def train(model, inputs, targets, in_, tar_):
             epoch_accuracy(model.predictions(x), y)
 
         for x,y in validation:
-            epoch_val_accuracy(model.predictions(x), y)
+            try:
+                epoch_val_accuracy(model.predictions(x), y)
+            except:
+                pass
+
 
 
 
@@ -56,8 +60,12 @@ def train(model, inputs, targets, in_, tar_):
         train_accuracy_results.append(epoch_accuracy.result())
         val_accuracy_results.append(epoch_val_accuracy.result())
 
+        log_accuracy(epoch_accuracy.result(), 'Train')
+        log_accuracy(epoch_val_accuracy.result(), 'Val')
+        log_loss(epoch_loss_avg.result())
         global_step.assign_add(1)
-        log_prediction(model, range=(min,max))
+        #log_prediction(model, range=(min,max))
+
 
 
         print("Epoch {:03d}: Loss: {:.3f} | Accuracy: {:.3f} | Validation: {:.3f}".format(epoch,epoch_loss_avg.result(),
