@@ -18,7 +18,7 @@ def train(model, inputs, targets, in_, tar_):
     validation = data(in_, tar_, model.batch_size)
     tfe = contrib.eager
 
-    optimizer = tf.train.AdamOptimizer(learning_rate=model.learning_rate, beta1=model.decay )
+    optimizer = tf.train.AdamOptimizer(learning_rate=model.learning_rate )
 
     global_step = tf.Variable(0)
 
